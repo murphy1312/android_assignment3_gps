@@ -16,6 +16,8 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, LocationListener {
 
+    private static int LOCATION_LIST_SIZE = 100;
+
     private TextView gps_active_tv;
     private TextView current_speed_tv;
     private TextView average_speed_tv;
@@ -25,6 +27,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private LocationManager locationManager;
     private boolean location_updates_active;
+    private LocationList locationList;
+
 
 
     @Override
@@ -36,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initListener();
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         location_updates_active = false;
-
+        locationList = new LocationList(LOCATION_LIST_SIZE);
 
     }
 
@@ -118,8 +122,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onLocationChanged(Location location)
     {
         // testing
-        Toast.makeText(this,":" +location.getLongitude() + " " + location.getLatitude(), Toast.LENGTH_SHORT).show();
-
+        // Toast.makeText(this,":" +location.getLongitude() + " " + location.getLatitude(), Toast.LENGTH_SHORT).show();
+        locationList.addLocation(location);
 
     }
 
