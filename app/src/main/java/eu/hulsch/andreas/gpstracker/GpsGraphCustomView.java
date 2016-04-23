@@ -9,12 +9,15 @@ import android.view.View;
  */
 public class GpsGraphCustomView extends View
 {
+    private int width_height;
+
     public GpsGraphCustomView(Context context)
     {
         super(context);
         init();
     }
-    public GpsGraphCustomView(Context context, AttributeSet attrs) {
+    public GpsGraphCustomView(Context context, AttributeSet attrs)
+    {
         super(context, attrs);
         init();
     }
@@ -29,5 +32,24 @@ public class GpsGraphCustomView extends View
 
     }
 
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
+    {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        setPadding(0,0,0,0);
 
+        int height = getMeasuredHeight();
+        int width = getMeasuredWidth();
+
+        if (height > width)
+        {
+            this.width_height = width;
+        }
+        else
+        {
+            this.width_height = height;
+        }
+        setMeasuredDimension(this.width_height, this.width_height);
+
+    }
 }
