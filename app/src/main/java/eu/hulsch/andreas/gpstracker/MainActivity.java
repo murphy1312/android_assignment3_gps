@@ -6,6 +6,8 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,7 +16,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, LocationListener {
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, LocationListener, LocationList.ILocationDataChangedListener {
 
     private static int LOCATION_LIST_SIZE = 100;
 
@@ -29,6 +34,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean location_updates_active;
     private LocationList locationList;
 
+    private Timer timer;
+    private int second_count;
+    public static Handler mHandler;
+
 
 
     @Override
@@ -41,11 +50,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initViews();
         initListener();
 
+        current_speed_tv.setText(getString(R.string.current_speed_not_available));
+        average_speed_tv.setText(getString(R.string.average_speed_not_available));
+        overall_time_tv.setText(getString(R.string.overall_time,0));
 
+        // handler for the timer to update the textview
+        mHandler = new Handler()
+         {
+            public void handleMessage(Message msg)
+            {
+                overall_time_tv.setText(getString(R.string.overall_time, second_count));
+            }
+         };
 
     }
 
-    private void initViews() {
+    private void initViews()
+    {
         gps_active_tv = (TextView) findViewById(R.id.gps_active);
         current_speed_tv = (TextView) findViewById(R.id.current_speed);
         average_speed_tv = (TextView) findViewById(R.id.average_speed);
@@ -54,9 +75,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         gpsGraphCustomView = (GpsGraphCustomView) findViewById(R.id.gps_graph_custom_view);
     }
 
-    private void initListener() {
+    private void initListener()
+    {
         tracking_btn.setOnClickListener(this);
         gpsGraphCustomView.setLocationList(this.locationList);
+        locationList.addLocationDataChangedListener(this);
     }
 
 
@@ -87,9 +110,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
+        this.locationList.reset();
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0f, this);
+
         tracking_btn.setText(R.string.stop_tracking);
         gps_active_tv.setText(R.string.gps_active);
+        overall_time_tv.setText(getString(R.string.overall_time,0));
+        startTimer();
+
+    }
+
+    protected void startTimer()
+    {
+        this.second_count = 0;
+        this.timer = new Timer(true);
+        this.timer.scheduleAtFixedRate(new TimerTask()
+        {
+            public void run()
+            {
+                mHandler.obtainMessage(1).sendToTarget();
+                second_count += 1; //increase every sec
+            }
+        }, 1000, 1000);
     }
 
     private void stop_tracking()
@@ -108,8 +150,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
         locationManager.removeUpdates(this);
+
         tracking_btn.setText(R.string.start_tracking);
         gps_active_tv.setText(R.string.gps_inactive);
+
+        this.timer.cancel();
     }
 
 
@@ -126,8 +171,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // testing
         // Toast.makeText(this,":" +location.getLongitude() + " " + location.getLatitude(), Toast.LENGTH_SHORT).show();
         locationList.addLocation(location);
-        this.current_speed_tv.setText("" +locationList.getCustomLocations().get(locationList.getCustomLocations().size()-1).getCurrent_speed());
-
     }
 
     /**
@@ -186,5 +229,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
 
         }
+    }
+
+
+    // notfiy from locationlist - location data changed
+    @Override
+    public void onLocationDataChanged()
+    {
+        this.current_speed_tv.setText(getString(R.string.current_speed,locationList.getCurrentSpeed(locationList.getCustomLocations().size()-1)));
+        this.average_speed_tv.setText(getString(R.string.average_speed,locationList.getAverageSpeed()));
+
     }
 }

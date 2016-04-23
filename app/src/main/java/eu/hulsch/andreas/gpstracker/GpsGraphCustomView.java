@@ -21,12 +21,13 @@ public class GpsGraphCustomView extends View implements LocationList.ILocationDa
     private float width_height;
     private float[] kmh_lines_points;
     private float[] speed_graph_points;
+    private float[] average_line_points;
 
     /* paints and so on */
     private Paint white_paint;
     private Paint black_paint;
     private Paint green_paint;
-    private Path speed_graph;
+    private Paint red_paint;
 
     public GpsGraphCustomView(Context context)
     {
@@ -49,7 +50,7 @@ public class GpsGraphCustomView extends View implements LocationList.ILocationDa
         // 6 lines * 4
         kmh_lines_points = new float[24];
         this.speed_graph_points = new float[0];
-        speed_graph = new Path();
+        this.average_line_points = new float[4];
 
         /** paints **/
         white_paint = new Paint();
@@ -60,6 +61,8 @@ public class GpsGraphCustomView extends View implements LocationList.ILocationDa
         green_paint.setColor(Color.GREEN);
         green_paint.setStyle(Paint.Style.STROKE);
         green_paint.setStrokeWidth(1.0f);
+        red_paint = new Paint();
+        red_paint.setColor(Color.RED);
 
 
     }
@@ -102,9 +105,11 @@ public class GpsGraphCustomView extends View implements LocationList.ILocationDa
         super.onDraw(canvas);
         canvas.drawRect(0, 0, this.width_height, this.width_height, this.black_paint);
         canvas.drawLines(this.kmh_lines_points, this.white_paint);
+
         if(this.speed_graph_points.length > 0)
         {
             canvas.drawLines(this.speed_graph_points, this.green_paint);
+            canvas.drawLines(this.average_line_points, this.red_paint);
         }
 
         // canvas.drawPath(this.speed_graph, this.green_paint);
@@ -118,7 +123,6 @@ public class GpsGraphCustomView extends View implements LocationList.ILocationDa
         {
             return;
         }
-        speed_graph = new Path();
         speed_graph_points = new float[(this.locationList.getCustomLocations().size()*4)-4];
 
         float margin_between_points;
@@ -131,35 +135,23 @@ public class GpsGraphCustomView extends View implements LocationList.ILocationDa
             margin_between_points = this.width_height / (this.locationList.getCustomLocations().size());
         }
 
-
-
         for(int i = 0; i < this.speed_graph_points.length; i = i+4)
         {
             // first point x, y
             this.speed_graph_points[i] = margin_between_points * (i/4);
-            this.speed_graph_points[i + 1] = (this.width_height / 60) * (60 - locationList.getCustomLocations().get((i / 4)).getCurrent_speed());
+            this.speed_graph_points[i + 1] = (this.width_height / 60) * (60 - locationList.getCurrentSpeed(i / 4));
             // second point x, y
             this.speed_graph_points[i+2] = margin_between_points * ((i+4)/4);
-            this.speed_graph_points[i+3] = (this.width_height / 60) * (60 - locationList.getCustomLocations().get(((i+4) / 4)).getCurrent_speed());
-            Log.d("tag", "" +this.speed_graph_points[i+2]);
+            this.speed_graph_points[i+3] = (this.width_height / 60) * (60 - locationList.getCurrentSpeed((i+4) / 4));
         }
 
-        /*
-        // add to path
-        for(int j = 0; j < this.speed_graph_points.length; j = j+4)
-        {
-            // add to path
-            if(j == 0)
-            {
-                this.speed_graph.moveTo(this.speed_graph_points[j], this.speed_graph_points[j + 1]);
-                continue;
-            }
-
-            this.speed_graph.lineTo(this.speed_graph_points[j], this.speed_graph_points[j + 1]);
-
-            this.speed_graph.lineTo(this.speed_graph_points[j + 2], this.speed_graph_points[j + 3]);
-
-        }*/
+        // average line points
+            // startX, startY
+        this.average_line_points[0] = 0f;
+        this.average_line_points[1] = (this.width_height / 60) * (60 - locationList.getAverageSpeed());
+            // endX, endY
+        this.average_line_points[2] = this.width_height;
+        this.average_line_points[3] = (this.width_height / 60) * (60 - locationList.getAverageSpeed());
 
 
         invalidate();

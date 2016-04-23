@@ -12,6 +12,7 @@ public class LocationList
 {
     private List<CustomLocation> customLocations;
     private int maxListSize;
+    private float averageSpeed;
 
     private List<ILocationDataChangedListener> locationDataChangedListener_list;
 
@@ -21,6 +22,11 @@ public class LocationList
         this.customLocations = new ArrayList<CustomLocation>();
         this.maxListSize = list_size;
         this.locationDataChangedListener_list = new ArrayList<ILocationDataChangedListener>();
+    }
+
+    public void reset()
+    {
+        this.customLocations = new ArrayList<CustomLocation>();
     }
 
     public void addLocation(Location location)
@@ -39,17 +45,37 @@ public class LocationList
             CustomLocation customLocation = new CustomLocation(location, customLocations.get(customLocations.size()-1).getLocation());
             customLocations.add(customLocation);
         }
+        this.averageSpeed = calculateAvarageSpeed();
 
         // notify Listener
         for(ILocationDataChangedListener listener : this.locationDataChangedListener_list)
         {
             listener.onLocationDataChanged();
         }
-
     }
+
+    private float calculateAvarageSpeed()
+    {
+        float overall=0;
+        for(int i = 0; i < this.customLocations.size(); i++)
+        {
+            overall+= customLocations.get(i).getCurrent_speed();
+        }
+        return overall/customLocations.size();
+    }
+
+    public float getCurrentSpeed(int at)
+    {
+        return customLocations.get(at).getCurrent_speed();
+    }
+
     public List<CustomLocation> getCustomLocations()
     {
         return customLocations;
+    }
+    public float getAverageSpeed()
+    {
+        return averageSpeed;
     }
 
     /*** interface to notify the customview ***/
@@ -67,7 +93,7 @@ public class LocationList
     }
 
     /*** CustomLocation class including the speed ***/
-    class CustomLocation
+    private class CustomLocation
     {
         private float current_speed;
         private Location location;

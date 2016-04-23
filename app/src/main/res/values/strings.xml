@@ -6,8 +6,12 @@
     <string name="start_tracking">Start tracking</string>
     <string name="stop_tracking">Stop tracking</string>
 
-    <string name="current_speed">Current speed: %1$d</string>
-    <string name="average_speed">Average speed: %1$d</string>
-    <string name="overall_time">Overall time: %1$d</string>
+    <string name="current_speed">Current speed: %1$f km/h</string>
+    <string name="average_speed">Average speed: %1$f km/h</string>
+    <string name="overall_time">Overall time: %1$d seconds</string>
+
+    <string name="current_speed_not_available">Current speed: N/A</string>
+    <string name="average_speed_not_available">Average speed: N/A</string>
+
 
 </resources>
