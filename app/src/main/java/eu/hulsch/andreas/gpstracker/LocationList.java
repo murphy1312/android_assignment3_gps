@@ -11,18 +11,21 @@ import java.util.List;
 public class LocationList
 {
     private List<CustomLocation> customLocations;
-    private int listSize;
+    private int maxListSize;
+
+    private List<ILocationDataChangedListener> locationDataChangedListener_list;
 
 
     public LocationList(int list_size)
     {
         this.customLocations = new ArrayList<CustomLocation>();
-        this.listSize = list_size;
+        this.maxListSize = list_size;
+        this.locationDataChangedListener_list = new ArrayList<ILocationDataChangedListener>();
     }
 
     public void addLocation(Location location)
     {
-        if(customLocations.size()>= listSize)
+        if(customLocations.size()>= maxListSize)
         {
             customLocations.remove(0);
         }
@@ -36,14 +39,35 @@ public class LocationList
             CustomLocation customLocation = new CustomLocation(location, customLocations.get(customLocations.size()-1).getLocation());
             customLocations.add(customLocation);
         }
+
+        // notify Listener
+        for(ILocationDataChangedListener listener : this.locationDataChangedListener_list)
+        {
+            listener.onLocationDataChanged();
+        }
+
+    }
+    public List<CustomLocation> getCustomLocations()
+    {
+        return customLocations;
     }
 
+    /*** interface to notify the customview ***/
+    public interface ILocationDataChangedListener
+    {
+        void onLocationDataChanged();
+    }
+    public void addLocationDataChangedListener(ILocationDataChangedListener listener)
+    {
+        this.locationDataChangedListener_list.add(listener);
+    }
+    public void removeLocationDataChangedListener(ILocationDataChangedListener listener)
+    {
+        this.locationDataChangedListener_list.remove(listener);
+    }
 
-
-
-
-
-    private class CustomLocation
+    /*** CustomLocation class including the speed ***/
+    class CustomLocation
     {
         private float current_speed;
         private Location location;

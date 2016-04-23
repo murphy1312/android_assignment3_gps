@@ -35,12 +35,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        initViews();
-        initListener();
+        locationList = new LocationList(LOCATION_LIST_SIZE);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         location_updates_active = false;
-        locationList = new LocationList(LOCATION_LIST_SIZE);
+        initViews();
+        initListener();
+
+
 
     }
 
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initListener() {
         tracking_btn.setOnClickListener(this);
+        gpsGraphCustomView.setLocationList(this.locationList);
     }
 
 
@@ -124,6 +126,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // testing
         // Toast.makeText(this,":" +location.getLongitude() + " " + location.getLatitude(), Toast.LENGTH_SHORT).show();
         locationList.addLocation(location);
+        this.current_speed_tv.setText("" +locationList.getCustomLocations().get(locationList.getCustomLocations().size()-1).getCurrent_speed());
 
     }
 
