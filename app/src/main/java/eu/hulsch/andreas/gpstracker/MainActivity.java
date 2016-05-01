@@ -19,9 +19,15 @@ import android.widget.Toast;
 import java.util.Timer;
 import java.util.TimerTask;
 
+
+// TODO
+// first point should not start at 0/0
+// gps on/off permission request
+
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, LocationListener, LocationList.ILocationDataChangedListener {
 
-    private static int LOCATION_LIST_SIZE = 100;
+    private static int LOCATION_LIST_SIZE = 30;
 
     private TextView gps_active_tv;
     private TextView current_speed_tv;
@@ -100,14 +106,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         location_updates_active = true;
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+
+            String[] arr = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
+            // only api level 23+ can request permissions at runtime
             return;
         }
         this.locationList.reset();
@@ -150,10 +153,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
         locationManager.removeUpdates(this);
-
-        tracking_btn.setText(R.string.start_tracking);
         gps_active_tv.setText(R.string.gps_inactive);
-
+        tracking_btn.setText(R.string.start_tracking);
         this.timer.cancel();
     }
 
@@ -168,8 +169,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onLocationChanged(Location location)
     {
-        // testing
-        // Toast.makeText(this,":" +location.getLongitude() + " " + location.getLatitude(), Toast.LENGTH_SHORT).show();
         locationList.addLocation(location);
     }
 
@@ -211,7 +210,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onProviderEnabled(String provider)
     {
-
+        if(provider == LocationManager.GPS_PROVIDER)
+        {
+            gps_active_tv.setText(R.string.gps_active);
+        }
     }
 
     /**
@@ -227,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         if(provider == LocationManager.GPS_PROVIDER)
         {
-
+            gps_active_tv.setText(R.string.gps_inactive);
         }
     }
 
@@ -238,6 +240,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         this.current_speed_tv.setText(getString(R.string.current_speed,locationList.getCurrentSpeed(locationList.getCustomLocations().size()-1)));
         this.average_speed_tv.setText(getString(R.string.average_speed,locationList.getAverageSpeed()));
-
     }
 }
